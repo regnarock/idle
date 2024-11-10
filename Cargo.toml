@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
+gloo-storage = "0.3.0"                                                 # Add this line
 
 [package.metadata]
 base-url = "/idle"
