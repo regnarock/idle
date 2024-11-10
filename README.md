@@ -9,6 +9,7 @@ This is a basic web-based clicker game where players can increment a counter by 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
+
 - Rust (latest stable version)
 - Trunk (`cargo install trunk`)
 - A modern web browser
@@ -16,12 +17,14 @@ Before you begin, ensure you have the following installed:
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone [your-repository-url]
 cd idle
 ```
 
 2. Install dependencies:
+
 ```bash
 cargo check
 ```
@@ -29,22 +32,36 @@ cargo check
 ## Running the Game
 
 1. Start the development server:
+
 ```bash
+rustup target add wasm32-unknown-unknown
+
 trunk serve
 ```
 
 2. Open your web browser and navigate to:
+
 ```
 http://127.0.0.1:8080
 ```
 
+## Running a Production Build
+
+```bash
+rustup target add wasm32-unknown-unknown
+```
+
+Then try the build command again:
+
+```bash
+trunk build --release --public-url /idle/
+```
 
 ## Built With
 
 - [Rust](https://www.rust-lang.org/) - The programming language used
 - [Yew](https://yew.rs/) - Web framework for building client web apps
 - [Trunk](https://trunkrs.dev/) - Build tool for WebAssembly applications
-
 
 ## Contributing
 
