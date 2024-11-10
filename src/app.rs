@@ -3,17 +3,10 @@ use crate::game::{GameAction, GameParameter, GameState};
 use crate::storage::GameStorage;
 use gloo_timers::callback::Interval;
 use yew::prelude::*;
-use crate::components::GameView;
 
 pub struct App {
-    state: GameState,
-<<<<<<< HEAD
+    state: UseStateHandle<GameState>,
     show_dev_panel: bool,
-
-=======
->>>>>>> 264cb8f (feat:add autosave)
-    _interval: Option<Interval>,
-    _save_interval: Option<Interval>,
 }
 
 impl Component for App {
@@ -21,77 +14,39 @@ impl Component for App {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        let state = GameStorage::load();
+        let state = use_state(|| GameStorage::load());
+        let show_dev_panel = false;
 
-        let link = ctx.link().clone();
-        let interval = Interval::new(1000, move || {
-            link.send_message(GameAction::AutoIncrement);
-        });
-
-        // Auto-save interval (every 5 seconds)
-        let link = ctx.link().clone();
-        let save_interval = Interval::new(5000, move || {
-            link.send_message(GameAction::Save);
-            log::debug!("Auto-saving game state");
-        });
-
-        Self {
-            state,
-            _interval: Some(interval),
-            _save_interval: Some(save_interval),
-<<<<<<< HEAD
-            show_dev_panel: false,
-=======
->>>>>>> 264cb8f (feat:add autosave)
+        // Example interval to increment counter automatically
+        {
+            let state = state.clone();
+            Interval::new(1000, move || {
+                let mut new_state = (*state).clone();
+                new_state.counter += new_state.upgrades.auto_clicker;
+                state.set(new_state);
+            })
+            .forget();
         }
+
+        Self { state, show_dev_panel }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             GameAction::Click => {
-                self.state.increment_counter();
+                let mut new_state = (*self.state).clone();
+                new_state.counter += 1;
+                self.state.set(new_state);
                 true
             }
             GameAction::Reset => {
-                self.state.reset();
-                GameStorage::clear();
+                self.state.set(GameState::new());
                 true
             }
-            GameAction::AutoIncrement => {
-                if self.state.upgrades.auto_clicker > 0 {
-                    self.state.counter += self.state.upgrades.auto_clicker;
-                    true
-                } else {
-                    false
-                }
-            }
-            GameAction::Save => {
-                let _ = GameStorage::save(&self.state);
-                false
-            }
-            GameAction::BuyAutoClicker => {
-                if self.state.counter >= 10 {
-                    self.state.counter -= 10;
-                    self.state.upgrades.auto_clicker += 1;
-                    self.state.clicks_per_second = self.state.upgrades.auto_clicker;
-                    true
-                } else {
-                    false
-                }
-            }
-            GameAction::BuyClickMultiplier => {
-                let (cost, _) = self.state.get_upgrade_costs();
-                if self.state.counter >= cost {
-                    self.state.counter -= cost;
-                    self.state.upgrades.click_multiplier +=
-                        if self.state.easy_mode { 10 } else { 1 };
-                    true
-                } else {
-                    false
-                }
-            }
             GameAction::ToggleEasyMode => {
-                self.state.easy_mode = !self.state.easy_mode;
+                let mut new_state = (*self.state).clone();
+                new_state.easy_mode = !new_state.easy_mode;
+                self.state.set(new_state);
                 true
             }
             GameAction::ToggleDevPanel => {
@@ -99,18 +54,48 @@ impl Component for App {
                 true
             }
             GameAction::UpdateGameParameter(param) => {
+                let mut new_state = (*self.state).clone();
                 match param {
                     GameParameter::BaseMultiplier(value) => {
-                        self.state.base_multiplier = value;
+                        new_state.base_multiplier = value;
                     }
                     GameParameter::CostScaling(value) => {
-                        self.state.cost_scaling = value;
+                        new_state.cost_scaling = value;
                     }
                     GameParameter::AutoClickerEfficiency(value) => {
-                        self.state.auto_clicker_efficiency = value;
+                        new_state.auto_clicker_efficiency = value;
                     }
                 }
+                self.state.set(new_state.clone());
+                let _ = GameStorage::save(&new_state);
+                true
+            }
+            GameAction::AutoIncrement => {
+                let mut new_state = (*self.state).clone();
+                new_state.counter += new_state.upgrades.auto_clicker;
+                self.state.set(new_state);
+                true
+            }
+            GameAction::Save => {
                 let _ = GameStorage::save(&self.state);
+                true
+            }
+            GameAction::BuyAutoClicker => {
+                let mut new_state = (*self.state).clone();
+                if new_state.counter >= 200 {
+                    new_state.counter -= 200;
+                    new_state.upgrades.auto_clicker += 1;
+                    self.state.set(new_state);
+                }
+                true
+            }
+            GameAction::BuyClickMultiplier => {
+                let mut new_state = (*self.state).clone();
+                if new_state.counter >= 100 {
+                    new_state.counter -= 100;
+                    new_state.upgrades.click_multiplier += 1;
+                    self.state.set(new_state);
+                }
                 true
             }
         }
@@ -129,7 +114,7 @@ impl Component for App {
                 </button>
                 if self.show_dev_panel {
                     <DevPanel
-                        game_state={self.state.clone()}
+                        game_state={(*self.state).clone()}
                         on_parameter_change={on_action.clone()}
                     />
                 }

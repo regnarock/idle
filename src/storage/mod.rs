@@ -2,7 +2,7 @@ use gloo_storage::{LocalStorage, Storage};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::File;
-use std::io::{self, Write};
+use std::io;
 use crate::game::GameState;
 
 const SAVE_KEY: &str = "idle_game_save";
