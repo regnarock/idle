@@ -1,5 +1,5 @@
 use crate::storage::GameStorage;
-use crate::game::GameState;
+use crate::game::{GameState, GameAction};
 use log::error;
 use yew::prelude::*;
 use web_sys::{Blob, Url, FileReader, HtmlElement, HtmlInputElement, ProgressEvent, Event};
@@ -7,9 +7,15 @@ use yew::events::MouseEvent;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 
+#[derive(Properties, PartialEq)]
+pub struct GameViewProps {
+    pub state: UseStateHandle<GameState>,
+    pub on_action: Callback<GameAction>,
+}
+
 #[function_component(GameView)]
-pub fn game_view() -> Html {
-    let state = use_state(|| GameStorage::load());
+pub fn game_view(props: &GameViewProps) -> Html {
+    let state = props.state.clone();
 
     let on_click = {
         let state = state.clone();
