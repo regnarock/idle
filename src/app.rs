@@ -7,6 +7,7 @@ use yew::prelude::*;
 pub struct App {
     state: GameState,
     _interval: Option<Interval>,
+    _save_interval: Option<Interval>,
 }
 
 impl Component for App {
@@ -21,9 +22,17 @@ impl Component for App {
             link.send_message(GameAction::AutoIncrement);
         });
 
+        // Auto-save interval (every 5 seconds)
+        let link = ctx.link().clone();
+        let save_interval = Interval::new(5000, move || {
+            link.send_message(GameAction::Save);
+            log::debug!("Auto-saving game state");
+        });
+
         Self {
             state,
             _interval: Some(interval),
+            _save_interval: Some(save_interval),
         }
     }
 
@@ -55,7 +64,6 @@ impl Component for App {
                     self.state.counter -= 10;
                     self.state.upgrades.auto_clicker += 1;
                     self.state.clicks_per_second = self.state.upgrades.auto_clicker;
-                    let _ = GameStorage::save(&self.state);
                     true
                 } else {
                     false
@@ -67,7 +75,6 @@ impl Component for App {
                     self.state.counter -= cost;
                     self.state.upgrades.click_multiplier +=
                         if self.state.easy_mode { 10 } else { 1 };
-                    let _ = GameStorage::save(&self.state);
                     true
                 } else {
                     false
@@ -75,7 +82,6 @@ impl Component for App {
             }
             GameAction::ToggleEasyMode => {
                 self.state.easy_mode = !self.state.easy_mode;
-                let _ = GameStorage::save(&self.state);
                 true
             }
         }
