@@ -62,14 +62,21 @@ impl Component for App {
                 }
             }
             GameAction::BuyClickMultiplier => {
-                if self.state.counter >= 50 {
-                    self.state.counter -= 50;
-                    self.state.upgrades.click_multiplier += 1;
+                let (cost, _) = self.state.get_upgrade_costs();
+                if self.state.counter >= cost {
+                    self.state.counter -= cost;
+                    self.state.upgrades.click_multiplier +=
+                        if self.state.easy_mode { 10 } else { 1 };
                     let _ = GameStorage::save(&self.state);
                     true
                 } else {
                     false
                 }
+            }
+            GameAction::ToggleEasyMode => {
+                self.state.easy_mode = !self.state.easy_mode;
+                let _ = GameStorage::save(&self.state);
+                true
             }
         }
     }

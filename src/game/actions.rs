@@ -6,4 +6,5 @@ pub enum GameAction {
     Save,
     BuyAutoClicker,
     BuyClickMultiplier,
+    ToggleEasyMode,
 }

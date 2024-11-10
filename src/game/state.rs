@@ -6,6 +6,7 @@ pub struct GameState {
     pub clicks_per_second: i32,
     pub last_saved: f64,
     pub upgrades: Upgrades,
+    pub easy_mode: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, PartialEq)]
@@ -26,5 +27,13 @@ impl GameState {
 
     pub fn reset(&mut self) {
         *self = Self::default();
+    }
+
+    pub fn get_upgrade_costs(&self) -> (i32, i32) {
+        if self.easy_mode {
+            (1, 10) // Easy mode costs
+        } else {
+            (10, 200) // Normal mode costs
+        }
     }
 }
