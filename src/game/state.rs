@@ -7,6 +7,7 @@ pub struct GameState {
     pub last_saved: f64,
     pub upgrades: Upgrades,
     pub easy_mode: bool,
+    pub x2_upgrade_cost: i32,
 
     // Developer panel parameters
     pub base_multiplier: f64,
@@ -31,6 +32,7 @@ impl GameState {
             base_multiplier: 1.0,
             cost_scaling: 1.15, // Common idle game scaling factor
             auto_clicker_efficiency: 1.0,
+            x2_upgrade_cost: 1,
         }
     }
 
