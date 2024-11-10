@@ -1,6 +1,6 @@
 # Idle Clicker Game
 
-A simple idle clicker game built with Rust and Yew framework.
+A simple multiplayer idle clicker game built with Rust and Yew framework.
 
 ## Description
 
