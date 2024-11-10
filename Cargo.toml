@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
+gloo-timers = "0.2"  # Use gloo-timers directly
 
 [package.metadata]
 base-url = "/idle"
