@@ -1,13 +1,8 @@
-use yew::prelude::*;
-use crate::game::{GameState, GameAction};
-use crate::storage::GameStorage;
 use crate::components::GameView;
+use crate::game::{GameAction, GameState};
+use crate::storage::GameStorage;
 use gloo_timers::callback::Interval;
-
-pub enum AppMsg {
-    GameAction(GameAction),
-    Tick,
-}
+use yew::prelude::*;
 
 pub struct App {
     state: GameState,
@@ -15,16 +10,15 @@ pub struct App {
 }
 
 impl Component for App {
-    type Message = AppMsg;
+    type Message = GameAction;
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
         let state = GameStorage::load();
-        
-        // Set up auto-save and auto-increment interval
+
         let link = ctx.link().clone();
         let interval = Interval::new(1000, move || {
-            link.send_message(AppMsg::Tick);
+            link.send_message(GameAction::AutoIncrement);
         });
 
         Self {
@@ -35,26 +29,42 @@ impl Component for App {
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            AppMsg::GameAction(action) => {
-                match action {
-                    GameAction::Click => self.state.increment_counter(),
-                    GameAction::Reset => {
-                        self.state.reset();
-                        GameStorage::clear();
-                    },
-                    GameAction::Save => {
-                        let _ = GameStorage::save(&self.state);
-                    },
-                    GameAction::AutoIncrement => {
-                        self.state.counter += self.state.clicks_per_second;
-                    },
-                }
-                let _ = GameStorage::save(&self.state);
+            GameAction::Click => {
+                self.state.increment_counter();
                 true
-            },
-            AppMsg::Tick => {
-                if self.state.clicks_per_second > 0 {
-                    self.state.counter += self.state.clicks_per_second;
+            }
+            GameAction::Reset => {
+                self.state.reset();
+                GameStorage::clear();
+                true
+            }
+            GameAction::AutoIncrement => {
+                if self.state.upgrades.auto_clicker > 0 {
+                    self.state.counter += self.state.upgrades.auto_clicker;
+                    true
+                } else {
+                    false
+                }
+            }
+            GameAction::Save => {
+                let _ = GameStorage::save(&self.state);
+                false
+            }
+            GameAction::BuyAutoClicker => {
+                if self.state.counter >= 10 {
+                    self.state.counter -= 10;
+                    self.state.upgrades.auto_clicker += 1;
+                    self.state.clicks_per_second = self.state.upgrades.auto_clicker;
+                    let _ = GameStorage::save(&self.state);
+                    true
+                } else {
+                    false
+                }
+            }
+            GameAction::BuyClickMultiplier => {
+                if self.state.counter >= 50 {
+                    self.state.counter -= 50;
+                    self.state.upgrades.click_multiplier += 1;
                     let _ = GameStorage::save(&self.state);
                     true
                 } else {
@@ -65,8 +75,7 @@ impl Component for App {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let on_action = ctx.link().callback(AppMsg::GameAction);
-        
+        let on_action = ctx.link().callback(|action| action);
         html! {
             <GameView state={self.state.clone()} {on_action} />
         }
