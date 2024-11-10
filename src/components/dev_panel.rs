@@ -1,5 +1,4 @@
 use crate::game::{GameAction, GameParameter, GameState};
-use gloo_utils::document;
 use plotters::prelude::*;
 use plotters_canvas::CanvasBackend;
 use web_sys::HtmlCanvasElement;
@@ -22,10 +21,15 @@ pub struct DevPanelProps {
 pub fn dev_panel(props: &DevPanelProps) -> Html {
     let canvas_ref = use_node_ref();
 
+    let x_range = use_state(|| 200f32);
+    let y_range = use_state(|| 10000f32);
+
     // Draw progression chart effect
     {
         let canvas_ref = canvas_ref.clone();
         let state = props.game_state.clone();
+        let x_range = *x_range;
+        let y_range = *y_range;
 
         use_effect(move || {
             if let Some(canvas) = canvas_ref.cast::<HtmlCanvasElement>() {
@@ -38,7 +42,7 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
                     .margin(5)
                     .x_label_area_size(50)
                     .y_label_area_size(60)
-                    .build_cartesian_2d(0f32..75f32, 0f32..1000f32)
+                    .build_cartesian_2d(0f32..x_range, 0f32..y_range)
                     .unwrap();
 
                 chart
@@ -53,7 +57,7 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
                 // Draw cost curve
                 chart
                     .draw_series(LineSeries::new(
-                        (0..75).map(|x| {
+                        (0..(x_range as i32)).map(|x| {
                             let x = x as f32;
                             (x, (10.0 * (1.15f32.powf(x))) as f32)
                         }),
@@ -66,7 +70,7 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
                 // Draw income curve
                 chart
                     .draw_series(LineSeries::new(
-                        (0..75).map(|x| {
+                        (0..(x_range as i32)).map(|x| {
                             let x = x as f32;
                             let base_income = state.calculate_clicks_per_second() as f32;
                             (x, base_income * x)
@@ -88,6 +92,27 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
         });
     }
 
+    let on_x_range_change = {
+        let x_range = x_range.clone();
+        Callback::from(move |e: Event| {
+            if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
+                if let Ok(value) = input.value().parse::<f32>() {
+                    x_range.set(value);
+                }
+            }
+        })
+    };
+
+    let on_y_range_change = {
+        let y_range = y_range.clone();
+        Callback::from(move |e: Event| {
+            if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
+                if let Ok(value) = input.value().parse::<f32>() {
+                    y_range.set(value);
+                }
+            }
+        })
+    };
     let on_base_multiplier_change = {
         let on_parameter_change = props.on_parameter_change.clone();
         Callback::from(move |e: Event| {
@@ -130,6 +155,35 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
     html! {
         <div class="dev-panel">
             <h2>{"Developer Panel"}</h2>
+
+            // Add chart range controls
+            <div class="chart-controls">
+                <h3>{"Chart Controls"}</h3>
+                <div class="parameter-group">
+                    <label>{"X-Axis Range"}</label>
+                    <input
+                        type="range"
+                        min="50"
+                        max="500"
+                        step="50"
+                        value={x_range.to_string()}
+                        onchange={on_x_range_change}
+                    />
+                    <span>{*x_range}</span>
+                </div>
+                <div class="parameter-group">
+                    <label>{"Y-Axis Range"}</label>
+                    <input
+                        type="range"
+                        min="1000"
+                        max="100000"
+                        step="1000"
+                        value={y_range.to_string()}
+                        onchange={on_y_range_change}
+                    />
+                    <span>{*y_range}</span>
+                </div>
+            </div>
 
             <div class="chart-container">
                 <canvas ref={canvas_ref} width="800" height="500"/>
