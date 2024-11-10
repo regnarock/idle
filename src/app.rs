@@ -1,11 +1,13 @@
-use crate::components::GameView;
-use crate::game::{GameAction, GameState};
+use crate::components::{DevPanel, GameView};
+use crate::game::{GameAction, GameParameter, GameState};
 use crate::storage::GameStorage;
 use gloo_timers::callback::Interval;
 use yew::prelude::*;
 
 pub struct App {
     state: GameState,
+    show_dev_panel: bool,
+
     _interval: Option<Interval>,
     _save_interval: Option<Interval>,
 }
@@ -33,6 +35,7 @@ impl Component for App {
             state,
             _interval: Some(interval),
             _save_interval: Some(save_interval),
+            show_dev_panel: false,
         }
     }
 
@@ -84,13 +87,46 @@ impl Component for App {
                 self.state.easy_mode = !self.state.easy_mode;
                 true
             }
+            GameAction::ToggleDevPanel => {
+                self.show_dev_panel = !self.show_dev_panel;
+                true
+            }
+            GameAction::UpdateGameParameter(param) => {
+                match param {
+                    GameParameter::BaseMultiplier(value) => {
+                        self.state.base_multiplier = value;
+                    }
+                    GameParameter::CostScaling(value) => {
+                        self.state.cost_scaling = value;
+                    }
+                    GameParameter::AutoClickerEfficiency(value) => {
+                        self.state.auto_clicker_efficiency = value;
+                    }
+                }
+                let _ = GameStorage::save(&self.state);
+                true
+            }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let on_action = ctx.link().callback(|action| action);
         html! {
-            <GameView state={self.state.clone()} {on_action} />
+            <>
+                <GameView state={self.state.clone()} on_action={ctx.link().callback(|action| action)} />
+                <button
+                    class="dev-panel-toggle"
+                    onclick={ctx.link().callback(|_| GameAction::ToggleDevPanel)}
+                >
+                    {"🛠️"}
+                </button>
+                if self.show_dev_panel {
+                    <DevPanel
+                        game_state={self.state.clone()}
+                        on_parameter_change={on_action.clone()}
+                    />
+                }
+            </>
         }
     }
 }
