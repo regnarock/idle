@@ -1,53 +1,151 @@
-use crate::game::{GameAction, GameState};
+use crate::storage::GameStorage;
+use crate::game::GameState;
+use log::error;
 use yew::prelude::*;
-
-#[derive(Properties, PartialEq)]
-pub struct GameViewProps {
-    pub state: GameState,
-    pub on_action: Callback<GameAction>,
-}
+use web_sys::{Blob, Url, FileReader, HtmlElement, HtmlInputElement, ProgressEvent, Event};
+use yew::events::MouseEvent;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::JsCast;
 
 #[function_component(GameView)]
-pub fn game_view(props: &GameViewProps) -> Html {
-    let GameViewProps { state, on_action } = props;
+pub fn game_view() -> Html {
+    let state = use_state(|| GameStorage::load());
 
     let on_click = {
-        let on_action = on_action.clone();
-        Callback::from(move |_| on_action.emit(GameAction::Click))
+        let state = state.clone();
+        Callback::from(move |_: MouseEvent| {
+            let mut new_state = (*state).clone();
+            new_state.counter += 1;
+            state.set(new_state);
+        })
     };
 
     let on_reset = {
-        let on_action = on_action.clone();
-        Callback::from(move |_| on_action.emit(GameAction::Reset))
+        let state = state.clone();
+        Callback::from(move |_: MouseEvent| {
+            state.set(GameState::new());
+        })
+    };
+
+    let on_save_to_file = {
+        let state: UseStateHandle<GameState> = state.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Err(e) = GameStorage::save_to_file(&*state) {
+                error!("Failed to save game state to file: {}", e);
+            }
+        })
+    };
+
+    let on_load_from_file = {
+        let state: UseStateHandle<GameState> = state.clone();
+        Callback::from(move |_: MouseEvent| {
+            match GameStorage::load_from_file() {
+                Ok(loaded_state) => state.set(loaded_state),
+                Err(e) => error!("Failed to load game state from file: {}", e),
+            }
+        })
+    };
+
+    let on_export_state = {
+        let state = state.clone();
+        Callback::from(move |_| {
+            if let Ok(json) = serde_json::to_string(&*state) {
+                let blob = Blob::new_with_str_sequence(&js_sys::Array::of1(&json.into())).unwrap();
+                let url = Url::create_object_url_with_blob(&blob).unwrap();
+                let window = web_sys::window().unwrap();
+                let document = window.document().unwrap();
+                let a = document.create_element("a").unwrap();
+                a.set_attribute("href", &url).unwrap();
+                a.set_attribute("download", "game_state.json").unwrap();
+                a.set_attribute("style", "display: none;").unwrap();
+                document.body().unwrap().append_child(&a).unwrap();
+                let a: HtmlElement = a.dyn_into().unwrap();
+                a.click();
+                document.body().unwrap().remove_child(&a).unwrap();
+                Url::revoke_object_url(&url).unwrap();
+            } else {
+                error!("Failed to export game state");
+            }
+        })
+    };
+
+    let on_import_state = {
+        let state = state.clone();
+        Callback::from(move |_| {
+            let window = web_sys::window().unwrap();
+            let document = window.document().unwrap();
+            let input = document.create_element("input").unwrap();
+            input.set_attribute("type", "file").unwrap();
+            input.set_attribute("style", "display: none;").unwrap();
+            document.body().unwrap().append_child(&input).unwrap();
+            let input: HtmlInputElement = input.dyn_into().unwrap();
+            let state = state.clone();
+            let closure = Closure::wrap(Box::new(move |event: Event| {
+                let input: HtmlInputElement = event.target().unwrap().dyn_into().unwrap();
+                let files = input.files().unwrap();
+                if files.length() > 0 {
+                    let file = files.get(0).unwrap();
+                    let reader = FileReader::new().unwrap();
+                    let state = state.clone();
+                    let onloadend = Closure::wrap(Box::new(move |event: ProgressEvent| {
+                        let reader: FileReader = event.target().unwrap().dyn_into().unwrap();
+                        if let Ok(result) = reader.result() {
+                            if let Some(json) = result.as_string() {
+                                if let Ok(loaded_state) = serde_json::from_str(&json) {
+                                    state.set(loaded_state);
+                                } else {
+                                    error!("Failed to parse imported game state");
+                                }
+                            }
+                        }
+                    }) as Box<dyn FnMut(_)>);
+                    reader.set_onloadend(Some(onloadend.as_ref().unchecked_ref()));
+                    reader.read_as_text(&file).unwrap();
+                    onloadend.forget();
+                }
+            }) as Box<dyn FnMut(_)>);
+            input.set_onchange(Some(closure.as_ref().unchecked_ref()));
+            input.click();
+            closure.forget();
+            document.body().unwrap().remove_child(&input).unwrap();
+        })
+    };
+
+    let on_buy_x2_upgrade = {
+        let state = state.clone();
+        Callback::from(move |_: MouseEvent| {
+            let mut new_state = (*state).clone();
+            if new_state.counter >= 100 {
+                new_state.counter -= 100;
+                new_state.upgrades.click_multiplier += 1;
+                state.set(new_state);
+            }
+        })
     };
 
     let on_buy_auto_clicker = {
-        let on_action = on_action.clone();
-        Callback::from(move |_| on_action.emit(GameAction::BuyAutoClicker))
+        let state = state.clone();
+        Callback::from(move |_: MouseEvent| {
+            let mut new_state = (*state).clone();
+            if new_state.counter >= 200 {
+                new_state.counter -= 200;
+                new_state.upgrades.auto_clicker += 1;
+                state.set(new_state);
+            }
+        })
     };
 
-    let on_buy_multiplier = {
-        let on_action = on_action.clone();
-        Callback::from(move |_| on_action.emit(GameAction::BuyClickMultiplier))
-    };
-    let (x2_upgrade_cost, auto_click_cost) = state.get_upgrade_costs();
-
-    let toggle_easy_mode = {
-        let on_action = on_action.clone();
-        Callback::from(move |_| on_action.emit(GameAction::ToggleEasyMode))
-    };
+    let x2_upgrade_cost = 100;
+    let auto_click_cost = 200;
 
     html! {
-        <div class="container">
-            <div class="left-panel">
-                <button onclick={toggle_easy_mode} class="easy-mode-button">
-                    { if state.easy_mode { "Disable Easy Mode" } else { "Enable Easy Mode" } }
-                </button>
+        <div>
+            <div class="upgrades">
                 <div
                     class={classes!("upgrade-square", (state.upgrades.click_multiplier > 0).then_some("active"))}
-                    onclick={on_buy_multiplier}
+                    onclick={on_buy_x2_upgrade}
                 >
-                    <div class="upgrade-icon">{ "💪" }</div>
+                    <div class="upgrade-icon">{ "⚡" }</div>
                     <span class="upgrade-text">{ format!("Upgrade x2 (Cost: {})", x2_upgrade_cost) }</span>
                 </div>
                 <div
@@ -65,6 +163,10 @@ pub fn game_view(props: &GameViewProps) -> Html {
                 <p>{ "Multiplier: " }{ (1 + state.upgrades.click_multiplier) }</p>
                 <button onclick={on_click}>{ "Click me!" }</button>
                 <button onclick={on_reset}>{ "Reset" }</button>
+                <button onclick={on_save_to_file}>{ "Save to File" }</button>
+                <button onclick={on_load_from_file}>{ "Load from File" }</button>
+                <button onclick={on_export_state}>{ "Export State" }</button>
+                <button onclick={on_import_state}>{ "Import State" }</button>
             </div>
         </div>
     }

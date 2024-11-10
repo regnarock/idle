@@ -5,9 +5,10 @@ edition = "2021"
 
 [dependencies]
 yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
-gloo-storage = "0.3.0" # Add this line
+gloo-storage = "0.3.0"
 gloo-timers = "0.3.0"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 js-sys = "0.3"
 log = "0.4"
 wasm-logger = "0.2"
@@ -21,6 +22,11 @@ web-sys = { version = "0.3", features = [
     "Window",
 ] }
 gloo-utils = "0.2"
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["FileReader", "Blob", "Url", "HtmlElement", "HtmlInputElement", "Event", "ProgressEvent"] }
+wasm-logger = "0.2"
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["FileReader", "Blob", "Url", "HtmlElement", "HtmlInputElement", "Event", "ProgressEvent"] }
 
 [package.metadata]
 base-url = "/idle"

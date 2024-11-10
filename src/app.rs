@@ -3,11 +3,15 @@ use crate::game::{GameAction, GameParameter, GameState};
 use crate::storage::GameStorage;
 use gloo_timers::callback::Interval;
 use yew::prelude::*;
+use crate::components::GameView;
 
 pub struct App {
     state: GameState,
+<<<<<<< HEAD
     show_dev_panel: bool,
 
+=======
+>>>>>>> 264cb8f (feat:add autosave)
     _interval: Option<Interval>,
     _save_interval: Option<Interval>,
 }
@@ -35,7 +39,10 @@ impl Component for App {
             state,
             _interval: Some(interval),
             _save_interval: Some(save_interval),
+<<<<<<< HEAD
             show_dev_panel: false,
+=======
+>>>>>>> 264cb8f (feat:add autosave)
         }
     }
 
