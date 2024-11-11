@@ -1,10 +1,5 @@
-use crate::storage::GameStorage;
 use crate::game::{GameState, GameAction};
-use log::error;
 use yew::prelude::*;
-use web_sys::{Blob, Url, FileReader, HtmlElement, HtmlInputElement, ProgressEvent, Event};
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
 
 #[derive(Properties, PartialEq)]
 pub struct GameViewProps {

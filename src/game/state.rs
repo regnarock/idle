@@ -44,19 +44,6 @@ impl GameState {
         *self = Self::new();
     }
 
-    pub fn get_upgrade_costs(&self) -> (i32, i32) {
-        let upgrades_config = load_upgrades_config();
-        let auto_clicker_cost = (upgrades_config.auto_clicker.base_cost as f64 * upgrades_config.auto_clicker.cost_scaling.powi(self.upgrades.auto_clicker)).round() as i32;
-        let click_multiplier_cost = (upgrades_config.click_multiplier.base_cost as f64 * upgrades_config.click_multiplier.cost_scaling.powi(self.upgrades.click_multiplier)).round() as i32;
-        (auto_clicker_cost, click_multiplier_cost)
-    }
-
-    pub fn calculate_progress_at_time(&self, time: f32) -> f32 {
-        let base_production = self.clicks_per_second as f32;
-        let multiplier = (self.base_multiplier * (1.0 + self.upgrades.click_multiplier as f64)) as f32;
-        base_production * multiplier * time
-    }
-
     pub fn calculate_clicks_per_second(&self) -> f64 {
         let base = self.clicks_per_second as f64;
         let multiplier = self.base_multiplier * (1.0 + self.upgrades.click_multiplier as f64);
@@ -92,27 +79,6 @@ impl GameState {
         }
     }
 
-    pub fn buy_upgrade(&mut self, upgrade_name: &str) {
-        let upgrades_config = load_upgrades_config();
-        match upgrade_name {
-            "auto_clicker" => {
-                let cost = self.get_upgrade_cost("auto_clicker");
-                if self.counter >= cost {
-                    self.counter -= cost;
-                    self.upgrades.auto_clicker += 1;
-                    self.clicks_per_second = self.upgrades.auto_clicker;
-                }
-            }
-            "click_multiplier" => {
-                let cost = self.get_upgrade_cost("click_multiplier");
-                if self.counter >= cost {
-                    self.counter -= cost;
-                    self.upgrades.click_multiplier += 1;
-                }
-            }
-            _ => {}
-        }
-    }
 
     pub fn apply_upgrade(&mut self, upgrade_name: &str) {
         match upgrade_name {

@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use crate::components::{DevPanel, GameView, State};
-use crate::hooks::{use_game_state, GameStateHandle};
+use crate::hooks::{{use_game_state, GameStateHandle}};
 use crate::predefined_states::load_predefined_states;
 
 #[function_component(App)]
