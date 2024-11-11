@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use crate::components::{DevPanel, GameView, State};
+use crate::components::{DevPanel, GameView, State, UpgradeConfig};
 use crate::hooks::{use_game_state, GameStateHandle};
 use crate::predefined_states::load_predefined_states;
 
@@ -25,6 +25,9 @@ pub fn app() -> Html {
                     <div class="tab">
                         <h2>{ "Game View" }</h2>
                         <GameView state={state.clone()} on_action={on_action.clone()} />
+                        <div class="sub-tab">
+                        <UpgradeConfig />
+                    </div>
                     </div>
                     <div class="tab">
                         <h2>{ "Dev Panel" }</h2>
