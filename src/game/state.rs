@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::upgrades::load_upgrades_config;
+use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct GameState {
@@ -69,16 +69,21 @@ impl GameState {
     pub fn get_upgrade_cost(&self, upgrade_name: &str) -> i32 {
         let upgrades_config = load_upgrades_config();
         match upgrade_name {
-            "auto_clicker" => {
-                (upgrades_config.auto_clicker.base_cost as f64 * upgrades_config.auto_clicker.cost_scaling.powi(self.upgrades.auto_clicker)).round() as i32
-            }
-            "click_multiplier" => {
-                (upgrades_config.click_multiplier.base_cost as f64 * upgrades_config.click_multiplier.cost_scaling.powi(self.upgrades.click_multiplier)).round() as i32
-            }
+            "auto_clicker" => (upgrades_config.auto_clicker.base_cost as f64
+                * upgrades_config
+                    .auto_clicker
+                    .cost_scaling
+                    .powi(self.upgrades.auto_clicker))
+            .round() as i32,
+            "click_multiplier" => (upgrades_config.click_multiplier.base_cost as f64
+                * upgrades_config
+                    .click_multiplier
+                    .cost_scaling
+                    .powi(self.upgrades.click_multiplier))
+            .round() as i32,
             _ => 0,
         }
     }
-
 
     pub fn apply_upgrade(&mut self, upgrade_name: &str) {
         match upgrade_name {
@@ -91,6 +96,20 @@ impl GameState {
             }
             _ => {}
         }
+    }
+
+    pub fn time_to_reach_resources(&self, target: f64) -> f64 {
+        let cps = self.calculate_clicks_per_second();
+        if cps <= 0.0 {
+            f64::INFINITY
+        } else {
+            (target - self.counter as f64) / cps
+        }
+    }
+
+    pub fn resources_at_time(&self, seconds: f64) -> f64 {
+        let cps = self.calculate_clicks_per_second();
+        self.counter as f64 + (cps * seconds)
     }
 }
 

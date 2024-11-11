@@ -1,4 +1,9 @@
-use crate::game::{GameState, GameAction};
+use crate::game::{GameAction, GameState};
+use crate::storage::GameStorage;
+use log::error;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::JsCast;
+use web_sys::{Blob, Event, FileReader, HtmlElement, HtmlInputElement, ProgressEvent, Url};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -44,6 +49,10 @@ pub fn game_view(props: &GameViewProps) -> Html {
                         let on_buy_upgrade = on_buy_upgrade.clone();
                         move |_| on_buy_upgrade.emit("click_multiplier".to_string())
                     })}
+                    title={format!(
+                        "Available in: {:.1}s",
+                        state.time_to_reach_resources(state.get_upgrade_cost("click_multiplier") as f64)
+                    )}
                 >
                     <div class="upgrade-icon">{ "⚡" }</div>
                     <span class="upgrade-text">{ format!("Upgrade x2 (Cost: {})", x2_upgrade_cost) }</span>
@@ -54,6 +63,10 @@ pub fn game_view(props: &GameViewProps) -> Html {
                         let on_buy_upgrade = on_buy_upgrade.clone();
                         move |_| on_buy_upgrade.emit("auto_clicker".to_string())
                     })}
+                    title={format!(
+                        "Available in: {:.1}s",
+                        state.time_to_reach_resources(state.get_upgrade_cost("auto_clicker") as f64)
+                    )}
                 >
                     <div class="upgrade-icon">{ "⏳" }</div>
                     <span class="upgrade-text">{ format!("Auto-Click (Cost: {})", auto_click_cost) }</span>

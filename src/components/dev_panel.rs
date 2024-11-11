@@ -1,5 +1,5 @@
-use crate::game::{GameState, GameAction, GameParameter};
 use crate::components::chart::draw_chart;
+use crate::game::{GameAction, GameParameter, GameState};
 use yew::prelude::*;
 
 pub enum DevPanelAction {
@@ -194,6 +194,26 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
                 <h3>{"Real-time Statistics"}</h3>
                 <p>{format!("Current CPS: {:.2}", props.game_state.calculate_clicks_per_second())}</p>
                 <p>{format!("Time to next upgrade: {:.2}s", props.game_state.time_to_next_upgrade())}</p>
+            </div>
+            <div class="projections">
+                <h3>{"Resource Projections"}</h3>
+                <table>
+                    <tr>
+                        <th>{"Time"}</th>
+                        <th>{"Resources"}</th>
+                    </tr>
+                    {
+                        [30.0, 60.0, 300.0, 600.0].iter().map(|&seconds| {
+                            let resources = props.game_state.resources_at_time(seconds);
+                            html! {
+                                <tr>
+                                    <td>{format!("{:.0} seconds", seconds)}</td>
+                                    <td>{format!("{:.0} resources", resources)}</td>
+                                </tr>
+                            }
+                        }).collect::<Html>()
+                    }
+                </table>
             </div>
         </div>
     }
