@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use crate::components::{DevPanel, GameView};
 use crate::hooks::{use_game_state, GameStateHandle};
-use crate::predifined_states::load_predefined_states;
+use crate::predefined_states::load_predefined_states;
 
 #[function_component(App)]
 pub fn app() -> Html {

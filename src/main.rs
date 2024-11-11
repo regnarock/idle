@@ -4,7 +4,7 @@ mod game;
 mod hooks;
 mod storage;
 mod utils;
-mod predifined_states;
+mod predefined_states;
 
 use app::App;
 
