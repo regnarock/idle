@@ -1,7 +1,7 @@
 use crate::upgrades::load_upgrades_config;
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct GameState {
     pub counter: i32,
     pub clicks_per_second: i32,
@@ -15,7 +15,7 @@ pub struct GameState {
     pub auto_clicker_efficiency: f64,
 }
 
-#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct Upgrades {
     pub auto_clicker: i32,
     pub click_multiplier: i32,
@@ -126,7 +126,7 @@ impl GameState {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 pub enum GameParameter {
     BaseMultiplier(f64),
     CostScaling(f64),
