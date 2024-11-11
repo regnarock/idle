@@ -1,5 +1,5 @@
-mod actions;
-mod state;
-pub use actions::GameAction;
-pub use actions::GameParameter;
-pub use state::GameState;
+pub mod actions;
+pub mod state;
+
+pub use actions::*;
+pub use state::*;

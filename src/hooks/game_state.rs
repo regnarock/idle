@@ -1,9 +1,7 @@
-use crate::game::{GameAction, GameState};
-use crate::storage::GameStorage;
-use gloo_timers::callback::Interval;
 use yew::prelude::*;
+use crate::game::{GameState, GameAction, GameParameter};
+use crate::storage::GameStorage;
 
-#[derive(Clone)]
 pub struct GameStateHandle {
     pub state: UseStateHandle<GameState>,
     pub on_action: Callback<GameAction>,
@@ -11,15 +9,11 @@ pub struct GameStateHandle {
 
 #[hook]
 pub fn use_game_state() -> GameStateHandle {
-    use crate::game::GameParameter;
-
     let state = use_state(|| GameStorage::load());
-
     let on_action = {
         let state = state.clone();
         Callback::from(move |action: GameAction| {
             let mut new_state = (*state).clone();
-
             match action {
                 GameAction::Click => {
                     new_state.increment_counter();
@@ -62,35 +56,5 @@ pub fn use_game_state() -> GameStateHandle {
             state.set(new_state);
         })
     };
-
     GameStateHandle { state, on_action }
-}
-
-#[hook]
-pub fn use_auto_increment(state: UseStateHandle<GameState>) {
-    use_effect(move || {
-        let state = state.clone();
-        let interval = Interval::new(1000, move || {
-            let mut current_state = (*state).clone();
-            if current_state.upgrades.auto_clicker > 0 {
-                current_state.counter += current_state.upgrades.auto_clicker;
-                state.set(current_state);
-            }
-        });
-
-        || drop(interval)
-    });
-}
-
-#[hook]
-pub fn use_auto_save(state: UseStateHandle<GameState>) {
-    use_effect(move || {
-        let state = state.clone();
-        let interval = Interval::new(5000, move || {
-            let _ = GameStorage::save(&state);
-            log::debug!("Auto-saving game state");
-        });
-
-        || drop(interval)
-    });
 }

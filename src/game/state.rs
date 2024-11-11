@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize, Default, PartialEq)]
+#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct GameState {
     pub counter: i32,
     pub clicks_per_second: i32,
@@ -15,7 +15,7 @@ pub struct GameState {
     pub auto_clicker_efficiency: f64,
 }
 
-#[derive(Clone, Serialize, Deserialize, Default, PartialEq)]
+#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct Upgrades {
     pub auto_clicker: i32,
     pub click_multiplier: i32,
@@ -37,9 +37,7 @@ impl GameState {
     }
 
     pub fn increment_counter(&mut self) {
-        self.counter +=
-            (1.0 * self.base_multiplier * (1.0 + self.upgrades.click_multiplier as f64)) as i32;
-        self.last_saved = js_sys::Date::now();
+        self.counter += 1;
     }
 
     pub fn reset(&mut self) {
@@ -47,11 +45,8 @@ impl GameState {
     }
 
     pub fn get_upgrade_costs(&self) -> (i32, i32) {
-        if self.easy_mode {
-            (1, 10) // Easy mode costs
-        } else {
-            (10, 200) // Normal mode costs
-        }
+        let cost = (self.x2_upgrade_cost as f64 * self.cost_scaling.powi(self.upgrades.click_multiplier)).round() as i32;
+        (cost, self.x2_upgrade_cost)
     }
 
     pub fn calculate_progress_at_time(&self, time: f32) -> f32 {
@@ -81,4 +76,11 @@ impl GameState {
             (next_upgrade_cost as f64 - self.counter as f64) / current_production
         }
     }
+}
+
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub enum GameParameter {
+    BaseMultiplier(f64),
+    CostScaling(f64),
+    AutoClickerEfficiency(f64),
 }

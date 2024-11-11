@@ -1,8 +1,10 @@
 mod app;
 mod components;
 mod game;
-mod hook;
+mod hooks;
 mod storage;
+mod utils;
+
 use app::App;
 
 fn main() {

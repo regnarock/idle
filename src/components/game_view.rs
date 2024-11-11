@@ -17,22 +17,20 @@ pub fn game_view(props: &GameViewProps) -> Html {
     let state = props.state.clone();
 
     let on_click = {
-        let state = state.clone();
-        Callback::from(move |_| {
-            let mut new_state = (*state).clone();
-            new_state.counter += 1;
-            state.set(new_state);
+        let on_action = props.on_action.clone();
+        Callback::from(move |_: MouseEvent| {
+            on_action.emit(GameAction::Click);
         })
     };
 
     let on_reset = {
-        let state = state.clone();
-        Callback::from(move |_| {
-            state.set(GameState::new());
+        let on_action = props.on_action.clone();
+        Callback::from(move |_: MouseEvent| {
+            on_action.emit(GameAction::Reset);
         })
     };
 
-    let on_save_to_file = {
+    let on_export_state = {
         let state = state.clone();
         Callback::from(move |_| {
             if let Ok(json) = serde_json::to_string(&*state) {
@@ -50,12 +48,12 @@ pub fn game_view(props: &GameViewProps) -> Html {
                 document.body().unwrap().remove_child(&a).unwrap();
                 Url::revoke_object_url(&url).unwrap();
             } else {
-                error!("Failed to save game state to file");
+                error!("Failed to export game state");
             }
         })
     };
 
-    let on_load_from_file = {
+    let on_import_state = {
         let state = state.clone();
         Callback::from(move |_| {
             let window = web_sys::window().unwrap();
@@ -90,31 +88,22 @@ pub fn game_view(props: &GameViewProps) -> Html {
             }) as Box<dyn FnMut(_)>);
             input.set_onchange(Some(closure.as_ref().unchecked_ref()));
             input.click();
-            closure.forget();            document.body().unwrap().remove_child(&input).unwrap();
+            closure.forget();
+            document.body().unwrap().remove_child(&input).unwrap();
         })
     };
 
     let on_buy_x2_upgrade = {
-        let state = state.clone();
+        let on_action = props.on_action.clone();
         Callback::from(move |_| {
-            let mut new_state = (*state).clone();
-            if new_state.counter >= 100 {
-                new_state.counter -= 100;
-                new_state.upgrades.click_multiplier += 1;
-                state.set(new_state);
-            }
+            on_action.emit(GameAction::BuyClickMultiplier);
         })
     };
 
     let on_buy_auto_clicker = {
-        let state = state.clone();
+        let on_action = props.on_action.clone();
         Callback::from(move |_| {
-            let mut new_state = (*state).clone();
-            if new_state.counter >= 200 {
-                new_state.counter -= 200;
-                new_state.upgrades.auto_clicker += 1;
-                state.set(new_state);
-            }
+            on_action.emit(GameAction::BuyAutoClicker);
         })
     };
 
@@ -146,8 +135,8 @@ pub fn game_view(props: &GameViewProps) -> Html {
                 <p>{ "Multiplier: " }{ (1 + state.upgrades.click_multiplier) }</p>
                 <button onclick={on_click}>{ "Click me!" }</button>
                 <button onclick={on_reset}>{ "Reset" }</button>
-                <button onclick={on_save_to_file}>{ "Save to File" }</button>
-                <button onclick={on_load_from_file}>{ "Load from File" }</button>
+                <button onclick={on_export_state}>{ "Export State" }</button>
+                <button onclick={on_import_state}>{ "Import State" }</button>
             </div>
         </div>
     }
