@@ -1,9 +1,9 @@
 use crate::components::chart::draw_chart;
 use crate::game::{GameAction, GameParameter, GameState};
-use crate::upgrades::{UpgradeParameters, UpgradesConfig};
+use crate::upgrades::{load_upgrades_config, UpgradeParameters, UpgradesConfig};
 use crate::utils::file::save_to_file;
+use gloo_timers::callback::Interval;
 use yew::prelude::*;
-use serde_json::to_string_pretty;
 
 pub enum DevPanelAction {
     UpdateBaseMultiplier(f64),
@@ -32,15 +32,24 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
     let y_range = use_state(|| 100000f32);
     let scale_type = use_state(|| ScaleType::Logarithmic);
 
-    // Draw progression chart effect
+    // Set up throttled chart drawing
     {
         let canvas_ref = canvas_ref.clone();
-        let state = *props.game_state.clone();
+        let state = props.game_state.clone();
         let x_range = *x_range;
         let y_range = *y_range;
+
         use_effect(move || {
-            draw_chart(canvas_ref, state, x_range, y_range);
-            || ()
+            // Initial draw
+            draw_chart(canvas_ref.clone(), (*state).clone(), x_range, y_range);
+
+            // Set up interval for subsequent draws
+            let interval = Interval::new(200, move || {
+                draw_chart(canvas_ref.clone(), (*state).clone(), x_range, y_range);
+            });
+
+            // Cleanup function
+            move || drop(interval)
         });
     }
 

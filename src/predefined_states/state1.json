@@ -1,14 +1,14 @@
 {
-    "counter": 100,
-    "clicks_per_second": 5,
-    "last_saved": 0,
-    "upgrades": {
-        "auto_clicker": 2,
-        "click_multiplier": 1
-    },
-    "easy_mode": false,
-    "x2_upgrade_cost": 10,
-    "base_multiplier": 1.5,
-    "cost_scaling": 1.2,
-    "auto_clicker_efficiency": 1.1
+  "counter": 10,
+  "clicks_per_second": 2,
+  "last_saved": 0,
+  "upgrades": {
+    "auto_clicker": 2,
+    "click_multiplier": 1
+  },
+  "easy_mode": false,
+  "x2_upgrade_cost": 10,
+  "base_multiplier": 1.5,
+  "cost_scaling": 1.2,
+  "auto_clicker_efficiency": 1.1
 }

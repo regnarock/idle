@@ -10,6 +10,13 @@ pub fn draw_chart(canvas_ref: NodeRef, state: GameState, x_range: f32, y_range: 
         let root = backend.into_drawing_area();
         root.fill(&WHITE).unwrap();
 
+        // Pre-calculate some values
+        let cps = state.calculate_clicks_per_second();
+        let current_resources = state.counter as f64;
+
+        // Reduce number of points (only plot 100 points)
+        let step_size = (x_range as i32 / 100).max(1);
+
         let mut chart = ChartBuilder::on(&root)
             .caption("Resource Projection", ("sans-serif", 20))
             .margin(5)
@@ -27,46 +34,18 @@ pub fn draw_chart(canvas_ref: NodeRef, state: GameState, x_range: f32, y_range: 
             .draw()
             .unwrap();
 
-        // Draw resource progression
+        // Draw resource progression with fewer points
         chart
             .draw_series(LineSeries::new(
-                (0..(x_range as i32)).map(|x| {
+                (0..(x_range as i32)).step_by(step_size as usize).map(|x| {
                     let time = x as f64;
-                    let mut projected_state = state.clone();
-                    let mut current_resources = state.counter as f64;
-                    let mut last_check_time = 0.0;
-
-                    // Check for upgrades that would have happened before this time
-                    while last_check_time < time {
-                        let next_upgrade_cost =
-                            projected_state.get_upgrade_cost("click_multiplier");
-                        let time_to_upgrade = (next_upgrade_cost as f64 - current_resources)
-                            / projected_state.calculate_clicks_per_second();
-
-                        if time_to_upgrade > 0.0 && (last_check_time + time_to_upgrade) <= time {
-                            // Update resources up to upgrade point
-                            current_resources +=
-                                projected_state.calculate_clicks_per_second() * time_to_upgrade;
-                            // Apply upgrade
-                            current_resources -= next_upgrade_cost as f64;
-                            projected_state.upgrades.click_multiplier += 1;
-                            last_check_time += time_to_upgrade;
-                        } else {
-                            // Add remaining time's resources
-                            current_resources += projected_state.calculate_clicks_per_second()
-                                * (time - last_check_time);
-                            break;
-                        }
-                    }
-
-                    (x as f32, current_resources as f32)
+                    let resources = current_resources + (cps * time);
+                    (x as f32, resources as f32)
                 }),
                 &BLUE,
             ))
-            .unwrap()
-            .label("Projected Resources")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
-        // Draw upgrade thresholds and time markers
+            .unwrap();
+        // Only draw upgrade lines if they're within the visible range
         let upgrades = vec![
             (
                 "Click Multiplier",
