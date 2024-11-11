@@ -10,18 +10,24 @@ pub struct GameViewProps {
 #[function_component(GameView)]
 pub fn game_view(props: &GameViewProps) -> Html {
     let state = props.state.clone();
-
+    let on_reset = {
+        let on_action = props.on_action.clone();
+        Callback::from(move |_: MouseEvent| {
+            if web_sys::window()
+                .unwrap()
+                .confirm_with_message(
+                    "Are you sure you want to reset? This will clear all progress.",
+                )
+                .unwrap()
+            {
+                on_action.emit(GameAction::Reset);
+            }
+        })
+    };
     let on_click = {
         let on_action = props.on_action.clone();
         Callback::from(move |_: MouseEvent| {
             on_action.emit(GameAction::Click);
-        })
-    };
-
-    let on_reset = {
-        let on_action = props.on_action.clone();
-        Callback::from(move |_: MouseEvent| {
-            on_action.emit(GameAction::Reset);
         })
     };
 

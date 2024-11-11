@@ -42,6 +42,10 @@ impl GameState {
 
     pub fn reset(&mut self) {
         *self = Self::new();
+        self.last_saved = js_sys::Date::now();
+        self.counter = 0;
+        self.clicks_per_second = 0;
+        self.upgrades = Upgrades::default();
     }
 
     pub fn calculate_clicks_per_second(&self) -> f64 {
