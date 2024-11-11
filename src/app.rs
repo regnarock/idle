@@ -26,13 +26,14 @@ pub fn app() -> Html {
                     <div class="tab">
                         <h2>{ "Game View" }</h2>
                         <GameView state={state.clone()} on_action={on_action.clone()} />
+                        <div class="sub-tab">
+                            <UpgradeConfig />
+                        </div>
                     </div>
                     <div class="tab">
                         <h2>{ "Dev Panel" }</h2>
                         <DevPanel game_state={state.clone()} on_parameter_change={on_action.clone()} />
-                        <div class="sub-tab">
-                            <UpgradeConfig />
-                        </div>
+
                     </div>
                     <div class="tab">
                         <h2>{ "State Management" }</h2>
