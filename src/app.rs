@@ -1,13 +1,16 @@
-use yew::prelude::*;
 use crate::components::{DevPanel, GameView, State, UpgradeConfig};
-use crate::hooks::{use_game_state, use_auto_save, GameStateHandle};
+use crate::hooks::{use_auto_increment, use_auto_save, use_game_state, GameStateHandle};
 use crate::predefined_states::load_predefined_states;
+use yew::prelude::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
     let GameStateHandle { state, on_action } = use_game_state();
     use_auto_save(state.clone());
     let predefined_states = use_state(|| load_predefined_states());
+
+    // Add this line to enable auto-increment
+    use_auto_increment(state.clone());
 
     let on_select_predefined_state = {
         let state = state.clone();

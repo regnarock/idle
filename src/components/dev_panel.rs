@@ -23,8 +23,8 @@ pub enum ScaleType {
 #[function_component(DevPanel)]
 pub fn dev_panel(props: &DevPanelProps) -> Html {
     let canvas_ref = use_node_ref();
-    let x_range = use_state(|| 200f32);
-    let y_range = use_state(|| 10000f32);
+    let x_range = use_state(|| 3600f32);
+    let y_range = use_state(|| 100000f32);
     let scale_type = use_state(|| ScaleType::Logarithmic);
 
     // Draw progression chart effect
@@ -132,9 +132,9 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
                     <label>{"Y-Axis Range"}</label>
                     <input
                         type="range"
-                        min="1000"
+                        min="10"
                         max="100000"
-                        step="1000"
+                        step="10"
                         value={y_range.to_string()}
                         onchange={on_y_range_change}
                     />
@@ -142,7 +142,7 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
                 </div>
             </div>
             <div class="chart-container">
-                <canvas ref={canvas_ref} width="800" height="500"/>
+                <canvas ref={canvas_ref} width="600" height="500"/>
             </div>
             <div class="parameters">
                 <h3>{"Game Parameters"}</h3>

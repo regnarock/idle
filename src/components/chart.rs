@@ -15,7 +15,7 @@ pub fn draw_chart(canvas_ref: NodeRef, state: GameState, x_range: f32, y_range: 
             .margin(5)
             .x_label_area_size(50)
             .y_label_area_size(60)
-            .build_cartesian_2d(0f32..x_range, (0f32..y_range).log_scale())
+            .build_cartesian_2d((0f32..x_range).log_scale(), (0f32..y_range).log_scale())
             .unwrap();
 
         chart

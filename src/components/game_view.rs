@@ -70,7 +70,8 @@ pub fn game_view(props: &GameViewProps) -> Html {
             <div class="game-panel">
                 <h1>{ "Idle Clicker Game" }</h1>
                 <p>{ "Current count: " }{ state.counter }</p>
-                <p>{ "Clicks per second: " }{ state.clicks_per_second }</p>
+                <p>{ "Clicks per second: " }{ state.calculate_clicks_per_second() }</p>
+                <p>{ "Click value: " }{ state.calculate_click_value() }</p>
                 <p>{ "Multiplier: " }{ (1 + state.upgrades.click_multiplier) }</p>
                 <button onclick={on_click}>{ "Click me!" }</button>
                 <button onclick={on_reset}>{ "Reset" }</button>

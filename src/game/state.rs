@@ -37,7 +37,7 @@ impl GameState {
     }
 
     pub fn increment_counter(&mut self) {
-        self.counter += 1;
+        self.counter += self.calculate_click_value();
     }
 
     pub fn reset(&mut self) {
@@ -45,9 +45,18 @@ impl GameState {
     }
 
     pub fn calculate_clicks_per_second(&self) -> f64 {
-        let base = self.clicks_per_second as f64;
-        let multiplier = self.base_multiplier * (1.0 + self.upgrades.click_multiplier as f64);
-        base * multiplier * self.auto_clicker_efficiency
+        if self.upgrades.auto_clicker > 0 {
+            let base_cps = self.upgrades.auto_clicker as f64;
+            let multiplier = (1.0 + self.upgrades.click_multiplier as f64) * self.base_multiplier;
+            base_cps * multiplier * self.auto_clicker_efficiency
+        } else {
+            0.0
+        }
+    }
+
+    pub fn calculate_click_value(&self) -> i32 {
+        let multiplier = (1.0 + self.upgrades.click_multiplier as f64) * self.base_multiplier;
+        multiplier.round() as i32
     }
 
     pub fn calculate_upgrade_cost(&self, current_level: i32) -> i32 {
@@ -89,10 +98,10 @@ impl GameState {
         match upgrade_name {
             "auto_clicker" => {
                 self.upgrades.auto_clicker += 1;
-                self.clicks_per_second = self.upgrades.auto_clicker;
+                // Don't need to set clicks_per_second directly anymore
             }
             "click_multiplier" => {
-                self.upgrades.click_multiplier += self.upgrades.click_multiplier;
+                self.upgrades.click_multiplier += 1;
             }
             _ => {}
         }
