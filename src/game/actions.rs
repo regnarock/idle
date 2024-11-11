@@ -9,7 +9,6 @@ pub enum GameAction {
     Reset,
     BuyAutoClicker,
     BuyClickMultiplier,
-    ToggleEasyMode,
     UpdateGameParameter(GameParameter),
     BuyUpgrade(String), // New action for buying upgrades
 }
@@ -52,11 +51,8 @@ pub fn use_game_action(state: UseStateHandle<GameState>) -> Callback<GameAction>
                 let (cost, _) = new_state.get_upgrade_costs();
                 if new_state.counter >= cost {
                     new_state.counter -= cost;
-                    new_state.upgrades.click_multiplier += if new_state.easy_mode { 10 } else { 1 };
+                    new_state.upgrades.click_multiplier += 1;
                 }
-            }
-            GameAction::ToggleEasyMode => {
-                new_state.easy_mode = !new_state.easy_mode;
             }
             GameAction::UpdateGameParameter(param) => match param {
                 GameParameter::BaseMultiplier(value) => {
@@ -70,7 +66,7 @@ pub fn use_game_action(state: UseStateHandle<GameState>) -> Callback<GameAction>
                 }
             },
             GameAction::BuyUpgrade(upgrade_name) => {
-                new_state.buy_upgrade(&upgrade_name);
+                new_state.apply_upgrade(&upgrade_name);
             }
         }
         state.set(new_state);

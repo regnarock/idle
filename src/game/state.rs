@@ -7,7 +7,6 @@ pub struct GameState {
     pub clicks_per_second: i32,
     pub last_saved: f64,
     pub upgrades: Upgrades,
-    pub easy_mode: bool,
     pub x2_upgrade_cost: i32,
 
     // Developer panel parameters
@@ -30,7 +29,6 @@ impl GameState {
             clicks_per_second: 0,
             last_saved: js_sys::Date::now(),
             upgrades: Upgrades::default(),
-            easy_mode: false,
             base_multiplier: upgrades_config.click_multiplier.multiplier.unwrap_or(1.0),
             cost_scaling: upgrades_config.click_multiplier.cost_scaling,
             auto_clicker_efficiency: upgrades_config.auto_clicker.efficiency.unwrap_or(1.0),
@@ -55,8 +53,7 @@ impl GameState {
 
     pub fn calculate_progress_at_time(&self, time: f32) -> f32 {
         let base_production = self.clicks_per_second as f32;
-        let multiplier =
-            (self.base_multiplier * (1.0 + self.upgrades.click_multiplier as f64)) as f32;
+        let multiplier = (self.base_multiplier * (1.0 + self.upgrades.click_multiplier as f64)) as f32;
         base_production * multiplier * time
     }
 
@@ -68,7 +65,7 @@ impl GameState {
 
     pub fn calculate_upgrade_cost(&self, current_level: i32) -> i32 {
         let upgrades_config = load_upgrades_config();
-        let base_cost = if self.easy_mode { 10 } else { upgrades_config.click_multiplier.base_cost };
+        let base_cost = upgrades_config.click_multiplier.base_cost;
         (base_cost as f64 * self.cost_scaling.powi(current_level)).round() as i32
     }
 
@@ -110,7 +107,7 @@ impl GameState {
                 let cost = self.get_upgrade_cost("click_multiplier");
                 if self.counter >= cost {
                     self.counter -= cost;
-                    self.upgrades.click_multiplier += if self.easy_mode { 10 } else { 1 };
+                    self.upgrades.click_multiplier += 1;
                 }
             }
             _ => {}
@@ -124,7 +121,7 @@ impl GameState {
                 self.clicks_per_second = self.upgrades.auto_clicker;
             }
             "click_multiplier" => {
-                self.upgrades.click_multiplier += if self.easy_mode { 10 } else { 1 };
+                self.upgrades.click_multiplier += 1;
             }
             _ => {}
         }

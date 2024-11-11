@@ -35,8 +35,7 @@ pub fn use_game_state() -> GameStateHandle {
                         let (cost, _) = new_state.get_upgrade_costs();
                         if new_state.counter >= cost {
                             new_state.counter -= cost;
-                            new_state.upgrades.click_multiplier +=
-                                if new_state.easy_mode { 10 } else { 1 };
+                            new_state.upgrades.click_multiplier += 1;
                         }
                     }
                     GameAction::BuyUpgrade(upgrade) => {
@@ -45,9 +44,6 @@ pub fn use_game_state() -> GameStateHandle {
                             new_state.counter -= cost;
                             new_state.apply_upgrade(upgrade.as_str());
                         }
-                    }
-                    GameAction::ToggleEasyMode => {
-                        new_state.easy_mode = !new_state.easy_mode;
                     }
                     GameAction::UpdateGameParameter(param) => match param {
                         GameParameter::BaseMultiplier(value) => {
