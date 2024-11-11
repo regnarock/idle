@@ -1,17 +1,19 @@
 use yew::prelude::*;
-use crate::components::{DevPanel, GameView};
-use crate::hooks::{use_game_state, GameStateHandle};
+use crate::components::{DevPanel, GameView, State};
+use crate::hooks::{{use_game_state, GameStateHandle}};
 use crate::predefined_states::load_predefined_states;
+
 
 #[function_component(App)]
 pub fn app() -> Html {
     let GameStateHandle { state, on_action } = use_game_state();
     let show_dev_panel = use_state(|| false);
     let predefined_states = use_state(|| load_predefined_states());
+    let active_tab = use_state(|| "GameView".to_string());
 
     let toggle_view = {
         let show_dev_panel = show_dev_panel.clone();
-        Callback::from(move |_| {
+        Callback::from(move |_: MouseEvent| {
             show_dev_panel.set(!*show_dev_panel);
         })
     };
@@ -26,31 +28,27 @@ pub fn app() -> Html {
         })
     };
 
+    let switch_tab = {
+        let active_tab = active_tab.clone();
+        Callback::from(move |tab: String| {
+            active_tab.set(tab);
+        })
+    };
+
     html! {
         <div>
-            <button onclick={toggle_view}>
-                { if *show_dev_panel { "Switch to Game View" } else { "Switch to Dev Panel" } }
-            </button>
-            <div>
-                <h3>{"Select Predefined State"}</h3>
-                <ul>
-                    { for predefined_states.iter().enumerate().map(|(index, _)| {
-                        let on_select = on_select_predefined_state.clone();
-                        html! {
-                            <li>
-                                <button onclick={Callback::from(move |_| on_select.emit(index))}>
-                                    { format!("State {}", index + 1) }
-                                </button>
-                            </li>
-                        }
-                    }) }
-                </ul>
+            <div class="tabs">
+                <button onclick={switch_tab.reform(|_| "GameView".to_string())}>{ "Game View" }</button>
+                <button onclick={switch_tab.reform(|_| "DevPanel".to_string())}>{ "Dev Panel" }</button>
+                <button onclick={switch_tab.reform(|_| "State".to_string())}>{ "State" }</button>
             </div>
             {
-                if *show_dev_panel {
+                if *active_tab == "GameView" {
+                    html! { <GameView state={state.clone()} on_action={on_action.clone()} /> }
+                } else if *active_tab == "DevPanel" {
                     html! { <DevPanel game_state={state.clone()} on_parameter_change={on_action.clone()} /> }
                 } else {
-                    html! { <GameView state={state.clone()} on_action={on_action.clone()} /> }
+                    html! { <State state={state.clone()} on_select_predefined_state={on_select_predefined_state.clone()} /> }
                 }
             }
         </div>
