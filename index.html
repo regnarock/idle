@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Idle Clicker Game</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -175,7 +178,43 @@
                 border-radius: 5px;
                 margin: 10px 0;
             }
+
+            .app-container {
+                display: flex;
+                height: 100vh;
+            }
+            .state-management-bar {
+                width: 300px;
+                padding: 20px;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+                overflow-y: auto;
+            }
+            .main-content {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            .navbar {
+                background: #333;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+            }
+            .navbar button {
+                background: #444;
+                border: none;
+                padding: 10px 20px;
+                cursor: pointer;
+            }
+            .navbar button:hover {
+                background: #555;
+            }
+            .content {
+                flex-grow: 1;
+                padding: 20px;
+                overflow-y: auto;
+            }
         </style>
     </head>
-    <body></body>
+<body></body>
 </html>
