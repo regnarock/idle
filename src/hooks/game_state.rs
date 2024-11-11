@@ -24,20 +24,6 @@ pub fn use_game_state() -> GameStateHandle {
                         new_state = GameState::new();
                         GameStorage::clear();
                     }
-                    GameAction::BuyAutoClicker => {
-                        if new_state.counter >= 10 {
-                            new_state.counter -= 10;
-                            new_state.upgrades.auto_clicker += 1;
-                            new_state.clicks_per_second = new_state.upgrades.auto_clicker;
-                        }
-                    }
-                    GameAction::BuyClickMultiplier => {
-                        let (cost, _) = new_state.get_upgrade_costs();
-                        if new_state.counter >= cost {
-                            new_state.counter -= cost;
-                            new_state.upgrades.click_multiplier += 1;
-                        }
-                    }
                     GameAction::BuyUpgrade(upgrade) => {
                         let cost = new_state.get_upgrade_cost(&upgrade);
                         if new_state.counter >= cost {

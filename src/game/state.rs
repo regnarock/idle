@@ -121,7 +121,7 @@ impl GameState {
                 self.clicks_per_second = self.upgrades.auto_clicker;
             }
             "click_multiplier" => {
-                self.upgrades.click_multiplier += 1;
+                self.upgrades.click_multiplier += self.upgrades.click_multiplier;
             }
             _ => {}
         }

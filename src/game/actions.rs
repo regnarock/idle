@@ -7,8 +7,6 @@ use yew::prelude::*;
 pub enum GameAction {
     Click,
     Reset,
-    BuyAutoClicker,
-    BuyClickMultiplier,
     UpdateGameParameter(GameParameter),
     BuyUpgrade(String), // New action for buying upgrades
 }
@@ -39,20 +37,6 @@ pub fn use_game_action(state: UseStateHandle<GameState>) -> Callback<GameAction>
             GameAction::Reset => {
                 new_state = GameState::new();
                 GameStorage::clear();
-            }
-            GameAction::BuyAutoClicker => {
-                if new_state.counter >= 10 {
-                    new_state.counter -= 10;
-                    new_state.upgrades.auto_clicker += 1;
-                    new_state.clicks_per_second = new_state.upgrades.auto_clicker;
-                }
-            }
-            GameAction::BuyClickMultiplier => {
-                let (cost, _) = new_state.get_upgrade_costs();
-                if new_state.counter >= cost {
-                    new_state.counter -= cost;
-                    new_state.upgrades.click_multiplier += 1;
-                }
             }
             GameAction::UpdateGameParameter(param) => match param {
                 GameParameter::BaseMultiplier(value) => {

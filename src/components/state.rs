@@ -1,6 +1,5 @@
 use yew::prelude::*;
 use crate::game::GameState;
-use crate::storage::GameStorage;
 use crate::predefined_states::load_predefined_states;
 use log::error;
 use web_sys::{Blob, Url, FileReader, HtmlElement, HtmlInputElement, ProgressEvent, Event};
