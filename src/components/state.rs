@@ -16,7 +16,7 @@ pub fn state(props: &StateProps) -> Html {
     let on_export_state = {
         let state = props.state.clone();
         Callback::from(move |_| {
-            GameStorage::save_to_file(&*state);
+            GameStorage::save_to_file(&*state, "game_state.json");
         })
     };
 

@@ -30,8 +30,8 @@ impl GameStorage {
         log::info!("Game state cleared");
     }
 
-    pub fn save_to_file(state: &GameState) {
-        save_to_file(state);
+    pub fn save_to_file(state: &GameState, file_path: &str) {
+        save_to_file(state, file_path);
     }
 
     pub fn load_from_file(state: UseStateHandle<GameState>) {

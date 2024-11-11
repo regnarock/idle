@@ -1,6 +1,9 @@
 use crate::components::chart::draw_chart;
 use crate::game::{GameAction, GameParameter, GameState};
+use crate::upgrades::{load_upgrades_config, UpgradeParameters, UpgradesConfig};
+use crate::utils::file::save_to_file;
 use yew::prelude::*;
+use serde_json::to_string_pretty;
 
 pub enum DevPanelAction {
     UpdateBaseMultiplier(f64),
@@ -26,6 +29,8 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
     let x_range = use_state(|| 3600f32);
     let y_range = use_state(|| 100000f32);
     let scale_type = use_state(|| ScaleType::Logarithmic);
+
+    let upgrades_config = use_state(|| load_upgrades_config());
 
     // Draw progression chart effect
     {
@@ -63,12 +68,20 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
 
     let on_base_multiplier_change = {
         let on_parameter_change = props.on_parameter_change.clone();
+        let upgrades_config = upgrades_config.clone();
         Callback::from(move |e: Event| {
             if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
                 if let Ok(value) = input.value().parse::<f64>() {
                     on_parameter_change.emit(GameAction::UpdateGameParameter(
                         GameParameter::BaseMultiplier(value),
                     ));
+                    upgrades_config.set(UpgradesConfig {
+                        click_multiplier: UpgradeParameters {
+                            multiplier: Some(value),
+                            ..upgrades_config.click_multiplier.clone()
+                        },
+                        ..(*upgrades_config).clone()
+                    });
                 }
             }
         })
@@ -76,12 +89,20 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
 
     let on_cost_scaling_change = {
         let on_parameter_change = props.on_parameter_change.clone();
+        let upgrades_config = upgrades_config.clone();
         Callback::from(move |e: Event| {
             if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
                 if let Ok(value) = input.value().parse::<f64>() {
                     on_parameter_change.emit(GameAction::UpdateGameParameter(
                         GameParameter::CostScaling(value),
                     ));
+                    upgrades_config.set(UpgradesConfig {
+                        click_multiplier: UpgradeParameters {
+                            cost_scaling: value,
+                            ..upgrades_config.click_multiplier.clone()
+                        },
+                        ..(*upgrades_config).clone()
+                    });
                 }
             }
         })
@@ -89,14 +110,29 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
 
     let on_auto_clicker_efficiency_change = {
         let on_parameter_change = props.on_parameter_change.clone();
+        let upgrades_config = upgrades_config.clone();
         Callback::from(move |e: Event| {
             if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
                 if let Ok(value) = input.value().parse::<f64>() {
                     on_parameter_change.emit(GameAction::UpdateGameParameter(
                         GameParameter::AutoClickerEfficiency(value),
                     ));
+                    upgrades_config.set(UpgradesConfig {
+                        auto_clicker: UpgradeParameters {
+                            efficiency: Some(value),
+                            ..upgrades_config.auto_clicker.clone()
+                        },
+                        ..(*upgrades_config).clone()
+                    });
                 }
             }
+        })
+    };
+
+    let on_save_upgrades = {
+        let upgrades_config = upgrades_config.clone();
+        Callback::from(move |_| {
+            save_to_file(&*upgrades_config, "upgrades.json");
         })
     };
 
@@ -183,6 +219,7 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
                     <span>{props.game_state.auto_clicker_efficiency}</span>
                 </div>
             </div>
+            <button onclick={on_save_upgrades}>{ "Save Upgrades" }</button>
             <div class="formulas">
                 <h3>{"Current Formulas"}</h3>
                 <pre>
