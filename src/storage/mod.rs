@@ -4,6 +4,7 @@ use serde_json;
 use std::fs::File;
 use std::io;
 use crate::game::GameState;
+use crate::predefined_states::load_predefined_states;
 
 const SAVE_KEY: &str = "idle_game_save";
 const SAVE_FILE: &str = "game_state.json";
@@ -13,7 +14,10 @@ pub struct GameStorage;
 
 impl GameStorage {
     pub fn load() -> GameState {
-        LocalStorage::get(SAVE_KEY).unwrap_or_else(|_| GameState::new())
+        LocalStorage::get(SAVE_KEY).unwrap_or_else(|_| {
+            let predefined_states = load_predefined_states();
+            predefined_states.get(0).cloned().unwrap_or_else(GameState::new)
+        })
     }
 
     pub fn save(state: &GameState) -> Result<(), String> {

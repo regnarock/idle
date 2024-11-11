@@ -1,11 +1,12 @@
 use yew::prelude::*;
 use crate::components::{DevPanel, GameView, State, UpgradeConfig};
-use crate::hooks::{use_game_state, GameStateHandle};
+use crate::hooks::{use_game_state, use_auto_save, GameStateHandle};
 use crate::predefined_states::load_predefined_states;
 
 #[function_component(App)]
 pub fn app() -> Html {
     let GameStateHandle { state, on_action } = use_game_state();
+    use_auto_save(state.clone());
     let predefined_states = use_state(|| load_predefined_states());
 
     let on_select_predefined_state = {
@@ -25,13 +26,13 @@ pub fn app() -> Html {
                     <div class="tab">
                         <h2>{ "Game View" }</h2>
                         <GameView state={state.clone()} on_action={on_action.clone()} />
-                        <div class="sub-tab">
-                        <UpgradeConfig />
-                    </div>
                     </div>
                     <div class="tab">
                         <h2>{ "Dev Panel" }</h2>
                         <DevPanel game_state={state.clone()} on_parameter_change={on_action.clone()} />
+                        <div class="sub-tab">
+                            <UpgradeConfig />
+                        </div>
                     </div>
                     <div class="tab">
                         <h2>{ "State Management" }</h2>

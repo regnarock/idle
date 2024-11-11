@@ -21,7 +21,7 @@ pub fn use_game_state() -> GameStateHandle {
                         new_state.increment_counter();
                     }
                     GameAction::Reset => {
-                        new_state = GameState::new();
+                        new_state.reset();
                         GameStorage::clear();
                     }
                     GameAction::BuyUpgrade(upgrade) => {

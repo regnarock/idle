@@ -7,7 +7,7 @@ use yew::prelude::*;
 pub fn use_auto_save(state: UseStateHandle<GameState>) {
     use_effect(move || {
         let state = state.clone();
-        let interval = Interval::new(5000, move || {
+        let interval = Interval::new(10000, move || {
             let _ = GameStorage::save(&state);
             log::debug!("Auto-saving game state");
         });
