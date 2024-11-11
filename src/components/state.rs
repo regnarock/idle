@@ -17,25 +17,6 @@ pub struct StateProps {
 pub fn state(props: &StateProps) -> Html {
     let predefined_states = use_state(|| load_predefined_states());
 
-    let on_save_to_file = {
-        let state = props.state.clone();
-        Callback::from(move |_| {
-            if let Err(e) = GameStorage::save_to_file(&*state) {
-                error!("Failed to save game state to file: {}", e);
-            }
-        })
-    };
-
-    let on_load_from_file = {
-        let state = props.state.clone();
-        Callback::from(move |_| {
-            match GameStorage::load_from_file() {
-                Ok(loaded_state) => state.set(loaded_state),
-                Err(e) => error!("Failed to load game state from file: {}", e),
-            }
-        })
-    };
-
     let on_export_state = {
         let state = props.state.clone();
         Callback::from(move |_| {
@@ -102,8 +83,6 @@ pub fn state(props: &StateProps) -> Html {
     html! {
         <div>
             <h3>{"State Management"}</h3>
-            <button onclick={on_save_to_file}>{ "Save to File" }</button>
-            <button onclick={on_load_from_file}>{ "Load from File" }</button>
             <button onclick={on_export_state}>{ "Export State" }</button>
             <button onclick={on_import_state}>{ "Import State" }</button>
             <div>
