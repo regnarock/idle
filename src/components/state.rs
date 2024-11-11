@@ -2,7 +2,6 @@ use yew::prelude::*;
 use crate::game::GameState;
 use crate::storage::GameStorage;
 use crate::predefined_states::load_predefined_states;
-use log::error;
 
 #[derive(Properties, PartialEq)]
 pub struct StateProps {
@@ -17,19 +16,14 @@ pub fn state(props: &StateProps) -> Html {
     let on_export_state = {
         let state = props.state.clone();
         Callback::from(move |_| {
-            if let Err(e) = GameStorage::save_to_file(&*state) {
-                error!("Failed to save game state to file: {}", e);
-            }
+            GameStorage::save_to_file(&*state);
         })
     };
 
     let on_import_state = {
         let state = props.state.clone();
         Callback::from(move |_| {
-            match GameStorage::load_from_file() {
-                Ok(loaded_state) => state.set(loaded_state),
-                Err(e) => error!("Failed to load game state from file: {}", e),
-            }
+            GameStorage::load_from_file(state.clone());
         })
     };
 

@@ -5,6 +5,8 @@ use yew::prelude::*;
 use log::error;
 use serde_json;
 
+use crate::game::GameState;
+
 pub fn save_to_file(state: &GameState) {
     if let Ok(json) = serde_json::to_string(state) {
         let blob = Blob::new_with_str_sequence(&js_sys::Array::of1(&json.into())).unwrap();
@@ -43,11 +45,12 @@ pub fn load_from_file(state: UseStateHandle<GameState>) {
             let state_clone = state_clone.clone();
             let onloadend = Closure::wrap(Box::new(move |event: ProgressEvent| {
                 let reader: FileReader = event.target().unwrap().dyn_into().unwrap();
-                if let Some(result) = reader.result().ok().and_then(|v| v.as_string()) {
-                    if let Ok(loaded_state) = serde_json::from_str(&result) {
-                        state_clone.set(loaded_state);
-                    } else {
-                        error!("Failed to parse imported game state");
+                if let Ok(result) = reader.result() {
+                    if let Some(json) = result.as_string() {
+                        match serde_json::from_str::<GameState>(&json) {
+                            Ok(loaded_state) => state_clone.set(loaded_state),
+                            Err(e) => error!("Failed to parse game state from file: {}", e),
+                        }
                     }
                 }
             }) as Box<dyn FnMut(_)>);

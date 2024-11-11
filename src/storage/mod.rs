@@ -1,13 +1,11 @@
 use gloo_storage::{LocalStorage, Storage};
 use serde::{Deserialize, Serialize};
-use serde_json;
-use std::fs::File;
-use std::io;
+use yew::UseStateHandle;
 use crate::game::GameState;
 use crate::predefined_states::load_predefined_states;
+use crate::utils::file::{save_to_file, load_from_file};
 
 const SAVE_KEY: &str = "idle_game_save";
-const SAVE_FILE: &str = "game_state.json";
 
 #[derive(Serialize, Deserialize)]
 pub struct GameStorage;
@@ -29,15 +27,11 @@ impl GameStorage {
         LocalStorage::delete(SAVE_KEY);
     }
 
-    pub fn save_to_file(state: &GameState) -> Result<(), io::Error> {
-        let file = File::create(SAVE_FILE)?;
-        serde_json::to_writer(file, state)?;
-        Ok(())
+    pub fn save_to_file(state: &GameState) {
+        save_to_file(state);
     }
 
-    pub fn load_from_file() -> Result<GameState, io::Error> {
-        let file = File::open(SAVE_FILE)?;
-        let state = serde_json::from_reader(file)?;
-        Ok(state)
+    pub fn load_from_file(state: UseStateHandle<GameState>) {
+        load_from_file(state);
     }
 }

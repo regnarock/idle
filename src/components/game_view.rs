@@ -1,9 +1,4 @@
 use crate::game::{GameAction, GameState};
-use crate::storage::GameStorage;
-use log::error;
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
-use web_sys::{Blob, Event, FileReader, HtmlElement, HtmlInputElement, ProgressEvent, Url};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
