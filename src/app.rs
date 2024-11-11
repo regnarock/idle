@@ -20,9 +20,6 @@ pub fn app() -> Html {
 
     html! {
         <div class="app-container">
-            <div class="state-management-bar">
-                <State state={state.clone()} on_select_predefined_state={on_select_predefined_state.clone()} />
-            </div>
             <div class="main-content">
                 <div class="tabs">
                     <div class="tab">
