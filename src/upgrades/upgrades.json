@@ -1,0 +1,12 @@
+{
+    "auto_clicker": {
+        "base_cost": 10,
+        "cost_scaling": 1.15,
+        "efficiency": 1.0
+    },
+    "click_multiplier": {
+        "base_cost": 50,
+        "cost_scaling": 1.15,
+        "multiplier": 2.0
+    }
+}

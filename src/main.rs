@@ -5,6 +5,7 @@ mod hooks;
 mod storage;
 mod utils;
 mod predefined_states;
+mod upgrades;
 
 use app::App;
 

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::upgrades::load_upgrades_config;
 
 #[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct GameState {
@@ -23,16 +24,17 @@ pub struct Upgrades {
 
 impl GameState {
     pub fn new() -> Self {
+        let upgrades_config = load_upgrades_config();
         Self {
             counter: 0,
             clicks_per_second: 0,
             last_saved: js_sys::Date::now(),
             upgrades: Upgrades::default(),
             easy_mode: false,
-            base_multiplier: 1.0,
-            cost_scaling: 1.15, // Common idle game scaling factor
-            auto_clicker_efficiency: 1.0,
-            x2_upgrade_cost: 1,
+            base_multiplier: upgrades_config.click_multiplier.multiplier.unwrap_or(1.0),
+            cost_scaling: upgrades_config.click_multiplier.cost_scaling,
+            auto_clicker_efficiency: upgrades_config.auto_clicker.efficiency.unwrap_or(1.0),
+            x2_upgrade_cost: upgrades_config.click_multiplier.base_cost,
         }
     }
 
@@ -41,12 +43,14 @@ impl GameState {
     }
 
     pub fn reset(&mut self) {
-        *self = Self::default();
+        *self = Self::new();
     }
 
     pub fn get_upgrade_costs(&self) -> (i32, i32) {
-        let cost = (self.x2_upgrade_cost as f64 * self.cost_scaling.powi(self.upgrades.click_multiplier)).round() as i32;
-        (cost, self.x2_upgrade_cost)
+        let upgrades_config = load_upgrades_config();
+        let auto_clicker_cost = (upgrades_config.auto_clicker.base_cost as f64 * upgrades_config.auto_clicker.cost_scaling.powi(self.upgrades.auto_clicker)).round() as i32;
+        let click_multiplier_cost = (upgrades_config.click_multiplier.base_cost as f64 * upgrades_config.click_multiplier.cost_scaling.powi(self.upgrades.click_multiplier)).round() as i32;
+        (auto_clicker_cost, click_multiplier_cost)
     }
 
     pub fn calculate_progress_at_time(&self, time: f32) -> f32 {
@@ -63,8 +67,9 @@ impl GameState {
     }
 
     pub fn calculate_upgrade_cost(&self, current_level: i32) -> i32 {
-        let base_cost = if self.easy_mode { 10 } else { 50 };
-        (base_cost as f64 * self.cost_scaling.powi(current_level)) as i32
+        let upgrades_config = load_upgrades_config();
+        let base_cost = if self.easy_mode { 10 } else { upgrades_config.click_multiplier.base_cost };
+        (base_cost as f64 * self.cost_scaling.powi(current_level)).round() as i32
     }
 
     pub fn time_to_next_upgrade(&self) -> f64 {
