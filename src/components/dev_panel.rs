@@ -101,7 +101,7 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
     };
 
     html! {
-        <div class="dev-panel">
+        <div>
             <h2>{"Developer Panel"}</h2>
             <button onclick={
                 let scale_type = scale_type.clone();

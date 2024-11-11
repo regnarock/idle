@@ -30,6 +30,7 @@ pub fn app() -> Html {
                 <UpgradeConfig game_state={state.clone()} />
             </div>
             </div>
+            
             <div class="main-content">
                 <div class="game-view">
                     <GameView state={state.clone()} on_action={on_action.clone()} />

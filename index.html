@@ -126,7 +126,6 @@
             }
 
             .dev-panel {
-                width: 300px;
                 padding: 20px;
                 overflow-y: auto;
                 box-shadow: -2px 0 10px rgba(0,0,0,0.5);
@@ -174,7 +173,8 @@
             }
 
             .app-container {
-                display: flex;
+                display: grid;
+                grid-template-columns: auto auto auto;
                 height: 100vh;
             }
             .state-management-bar {
@@ -184,9 +184,9 @@
                 overflow-y: auto;
             }
             .main-content {
-                flex-grow: 1;
-                display: flex;
-                flex-direction: row;
+                display: grid;
+                grid-template-columns: auto auto;
+                height: 100%;
             }
             .navbar {
                 background: #333;
