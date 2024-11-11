@@ -1,5 +1,6 @@
-pub mod dev_panel;
-pub mod game_view;
+mod chart;
+mod dev_panel;
+mod game_view;
 
-pub use dev_panel::DevPanel;
+pub use dev_panel::{DevPanel, DevPanelAction};
 pub use game_view::GameView;

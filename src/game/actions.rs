@@ -1,8 +1,7 @@
-use yew::prelude::*;
-use crate::game::{GameState, GameParameter};
+use crate::components::DevPanelAction;
+use crate::game::{GameParameter, GameState};
 use crate::storage::GameStorage;
-use crate::components::dev_panel::DevPanelAction;
-
+use yew::prelude::*;
 
 #[derive(Clone)]
 pub enum GameAction {
@@ -52,8 +51,7 @@ pub fn use_game_action(state: UseStateHandle<GameState>) -> Callback<GameAction>
                 let (cost, _) = new_state.get_upgrade_costs();
                 if new_state.counter >= cost {
                     new_state.counter -= cost;
-                    new_state.upgrades.click_multiplier +=
-                        if new_state.easy_mode { 10 } else { 1 };
+                    new_state.upgrades.click_multiplier += if new_state.easy_mode { 10 } else { 1 };
                 }
             }
             GameAction::ToggleEasyMode => {

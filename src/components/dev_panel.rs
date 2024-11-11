@@ -1,5 +1,7 @@
-use crate::game::{GameState, GameAction, GameParameter};
-use crate::utils::chart::draw_chart;
+use crate::{
+    components::chart::draw_chart,
+    game::{GameAction, GameParameter, GameState},
+};
 use yew::prelude::*;
 
 pub enum DevPanelAction {
@@ -14,11 +16,18 @@ pub struct DevPanelProps {
     pub on_parameter_change: Callback<GameAction>,
 }
 
+#[derive(PartialEq, Clone)]
+pub enum ScaleType {
+    Linear,
+    Logarithmic,
+}
+
 #[function_component(DevPanel)]
 pub fn dev_panel(props: &DevPanelProps) -> Html {
     let canvas_ref = use_node_ref();
     let x_range = use_state(|| 200f32);
     let y_range = use_state(|| 10000f32);
+    let scale_type = use_state(|| ScaleType::Logarithmic);
 
     // Draw progression chart effect
     {
@@ -97,6 +106,19 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
         <div class="dev-panel">
             <h2>{"Developer Panel"}</h2>
             // Add chart range controls
+            <button onclick={
+                        let scale_type = scale_type.clone();
+                        Callback::from(move |_| {
+                            scale_type.set(match *scale_type {
+                                ScaleType::Linear => ScaleType::Logarithmic,
+                                ScaleType::Logarithmic => ScaleType::Linear,
+                            });
+                        })
+                    }>
+                        {format!("Toggle {} Scale",
+                            if *scale_type == ScaleType::Linear { "Logarithmic" } else { "Linear" }
+                        )}
+                    </button>
             <div class="chart-controls">
                 <h3>{"Chart Controls"}</h3>
                 <div class="parameter-group">
