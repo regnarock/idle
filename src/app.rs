@@ -21,24 +21,18 @@ pub fn app() -> Html {
 
     html! {
         <div class="app-container">
+            <div class="state-management-bar">
+                <State state={state.clone()} on_select_predefined_state={on_select_predefined_state.clone()} />
+                <div class="sub-tab">
+                <UpgradeConfig game_state={state.clone()} />
+            </div>
+            </div>
             <div class="main-content">
-                <div class="tabs">
-                    <div class="tab">
-                        <h2>{ "Game View" }</h2>
-                        <GameView state={state.clone()} on_action={on_action.clone()} />
-                        <div class="sub-tab">
-                            <UpgradeConfig />
-                        </div>
-                    </div>
-                    <div class="tab">
-                        <h2>{ "Dev Panel" }</h2>
-                        <DevPanel game_state={state.clone()} on_parameter_change={on_action.clone()} />
-
-                    </div>
-                    <div class="tab">
-                        <h2>{ "State Management" }</h2>
-                        <State state={state.clone()} on_select_predefined_state={on_select_predefined_state.clone()} />
-                    </div>
+                <div class="game-view">
+                    <GameView state={state.clone()} on_action={on_action.clone()} />
+                </div>
+                <div class="dev-panel">
+                    <DevPanel game_state={state.clone()} on_parameter_change={on_action.clone()} />
                 </div>
             </div>
         </div>
