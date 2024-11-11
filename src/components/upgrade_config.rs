@@ -1,15 +1,16 @@
 use yew::prelude::*;
-use crate::upgrades::load_upgrades_config;
+use crate::upgrades::UpgradesConfig;
 use crate::game::GameState;
 
 #[derive(Properties, PartialEq)]
 pub struct UpgradeConfigProps {
     pub game_state: UseStateHandle<GameState>,
+    pub upgrades_config: UseStateHandle<UpgradesConfig>,
 }
 
 #[function_component(UpgradeConfig)]
 pub fn upgrade_config(props: &UpgradeConfigProps) -> Html {
-    let upgrades_config = load_upgrades_config();
+    let upgrades_config = props.upgrades_config.clone();
     let game_state = props.game_state.clone();
 
     let auto_clicker_count = game_state.upgrades.auto_clicker;

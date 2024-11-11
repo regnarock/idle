@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct UpgradeParameters {
     pub base_cost: i32,
     pub cost_scaling: f64,
@@ -9,7 +9,7 @@ pub struct UpgradeParameters {
     pub multiplier: Option<f64>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct UpgradesConfig {
     pub auto_clicker: UpgradeParameters,
     pub click_multiplier: UpgradeParameters,

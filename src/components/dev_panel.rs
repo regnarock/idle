@@ -1,6 +1,6 @@
 use crate::components::chart::draw_chart;
 use crate::game::{GameAction, GameParameter, GameState};
-use crate::upgrades::{load_upgrades_config, UpgradeParameters, UpgradesConfig};
+use crate::upgrades::{UpgradeParameters, UpgradesConfig};
 use crate::utils::file::save_to_file;
 use yew::prelude::*;
 use serde_json::to_string_pretty;
@@ -15,6 +15,8 @@ pub enum DevPanelAction {
 pub struct DevPanelProps {
     pub game_state: UseStateHandle<GameState>,
     pub on_parameter_change: Callback<GameAction>,
+    pub upgrades_config: UseStateHandle<UpgradesConfig>,
+    pub on_update_upgrades_config: Callback<UpgradesConfig>,
 }
 
 #[derive(PartialEq, Clone)]
@@ -29,8 +31,6 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
     let x_range = use_state(|| 3600f32);
     let y_range = use_state(|| 100000f32);
     let scale_type = use_state(|| ScaleType::Logarithmic);
-
-    let upgrades_config = use_state(|| load_upgrades_config());
 
     // Draw progression chart effect
     {
@@ -68,20 +68,17 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
 
     let on_base_multiplier_change = {
         let on_parameter_change = props.on_parameter_change.clone();
-        let upgrades_config = upgrades_config.clone();
+        let upgrades_config = props.upgrades_config.clone();
+        let on_update_upgrades_config = props.on_update_upgrades_config.clone();
         Callback::from(move |e: Event| {
             if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
                 if let Ok(value) = input.value().parse::<f64>() {
                     on_parameter_change.emit(GameAction::UpdateGameParameter(
                         GameParameter::BaseMultiplier(value),
                     ));
-                    upgrades_config.set(UpgradesConfig {
-                        click_multiplier: UpgradeParameters {
-                            multiplier: Some(value),
-                            ..upgrades_config.click_multiplier.clone()
-                        },
-                        ..(*upgrades_config).clone()
-                    });
+                    let mut new_config = (*upgrades_config).clone();
+                    new_config.click_multiplier.multiplier = Some(value);
+                    on_update_upgrades_config.emit(new_config);
                 }
             }
         })
@@ -89,20 +86,17 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
 
     let on_cost_scaling_change = {
         let on_parameter_change = props.on_parameter_change.clone();
-        let upgrades_config = upgrades_config.clone();
+        let upgrades_config = props.upgrades_config.clone();
+        let on_update_upgrades_config = props.on_update_upgrades_config.clone();
         Callback::from(move |e: Event| {
             if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
                 if let Ok(value) = input.value().parse::<f64>() {
                     on_parameter_change.emit(GameAction::UpdateGameParameter(
                         GameParameter::CostScaling(value),
                     ));
-                    upgrades_config.set(UpgradesConfig {
-                        click_multiplier: UpgradeParameters {
-                            cost_scaling: value,
-                            ..upgrades_config.click_multiplier.clone()
-                        },
-                        ..(*upgrades_config).clone()
-                    });
+                    let mut new_config = (*upgrades_config).clone();
+                    new_config.click_multiplier.cost_scaling = value;
+                    on_update_upgrades_config.emit(new_config);
                 }
             }
         })
@@ -110,27 +104,24 @@ pub fn dev_panel(props: &DevPanelProps) -> Html {
 
     let on_auto_clicker_efficiency_change = {
         let on_parameter_change = props.on_parameter_change.clone();
-        let upgrades_config = upgrades_config.clone();
+        let upgrades_config = props.upgrades_config.clone();
+        let on_update_upgrades_config = props.on_update_upgrades_config.clone();
         Callback::from(move |e: Event| {
             if let Some(input) = e.target_dyn_into::<web_sys::HtmlInputElement>() {
                 if let Ok(value) = input.value().parse::<f64>() {
                     on_parameter_change.emit(GameAction::UpdateGameParameter(
                         GameParameter::AutoClickerEfficiency(value),
                     ));
-                    upgrades_config.set(UpgradesConfig {
-                        auto_clicker: UpgradeParameters {
-                            efficiency: Some(value),
-                            ..upgrades_config.auto_clicker.clone()
-                        },
-                        ..(*upgrades_config).clone()
-                    });
+                    let mut new_config = (*upgrades_config).clone();
+                    new_config.auto_clicker.efficiency = Some(value);
+                    on_update_upgrades_config.emit(new_config);
                 }
             }
         })
     };
 
     let on_save_upgrades = {
-        let upgrades_config = upgrades_config.clone();
+        let upgrades_config = props.upgrades_config.clone();
         Callback::from(move |_| {
             save_to_file(&*upgrades_config, "upgrades.json");
         })
