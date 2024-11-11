@@ -1,0 +1,14 @@
+{
+    "counter": 200,
+    "clicks_per_second": 10,
+    "last_saved": 0,
+    "upgrades": {
+        "auto_clicker": 4,
+        "click_multiplier": 2
+    },
+    "easy_mode": true,
+    "x2_upgrade_cost": 20,
+    "base_multiplier": 2.0,
+    "cost_scaling": 1.3,
+    "auto_clicker_efficiency": 1.2
+}
