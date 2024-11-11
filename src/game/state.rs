@@ -81,6 +81,54 @@ impl GameState {
             (next_upgrade_cost as f64 - self.counter as f64) / current_production
         }
     }
+
+    pub fn get_upgrade_cost(&self, upgrade_name: &str) -> i32 {
+        let upgrades_config = load_upgrades_config();
+        match upgrade_name {
+            "auto_clicker" => {
+                (upgrades_config.auto_clicker.base_cost as f64 * upgrades_config.auto_clicker.cost_scaling.powi(self.upgrades.auto_clicker)).round() as i32
+            }
+            "click_multiplier" => {
+                (upgrades_config.click_multiplier.base_cost as f64 * upgrades_config.click_multiplier.cost_scaling.powi(self.upgrades.click_multiplier)).round() as i32
+            }
+            _ => 0,
+        }
+    }
+
+    pub fn buy_upgrade(&mut self, upgrade_name: &str) {
+        let upgrades_config = load_upgrades_config();
+        match upgrade_name {
+            "auto_clicker" => {
+                let cost = self.get_upgrade_cost("auto_clicker");
+                if self.counter >= cost {
+                    self.counter -= cost;
+                    self.upgrades.auto_clicker += 1;
+                    self.clicks_per_second = self.upgrades.auto_clicker;
+                }
+            }
+            "click_multiplier" => {
+                let cost = self.get_upgrade_cost("click_multiplier");
+                if self.counter >= cost {
+                    self.counter -= cost;
+                    self.upgrades.click_multiplier += if self.easy_mode { 10 } else { 1 };
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn apply_upgrade(&mut self, upgrade_name: &str) {
+        match upgrade_name {
+            "auto_clicker" => {
+                self.upgrades.auto_clicker += 1;
+                self.clicks_per_second = self.upgrades.auto_clicker;
+            }
+            "click_multiplier" => {
+                self.upgrades.click_multiplier += if self.easy_mode { 10 } else { 1 };
+            }
+            _ => {}
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, PartialEq)]

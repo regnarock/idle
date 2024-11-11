@@ -11,6 +11,7 @@ pub enum GameAction {
     BuyClickMultiplier,
     ToggleEasyMode,
     UpdateGameParameter(GameParameter),
+    BuyUpgrade(String), // New action for buying upgrades
 }
 
 impl From<DevPanelAction> for GameAction {
@@ -68,7 +69,9 @@ pub fn use_game_action(state: UseStateHandle<GameState>) -> Callback<GameAction>
                     new_state.auto_clicker_efficiency = value;
                 }
             },
-            _ => return,
+            GameAction::BuyUpgrade(upgrade_name) => {
+                new_state.buy_upgrade(&upgrade_name);
+            }
         }
         state.set(new_state);
     })

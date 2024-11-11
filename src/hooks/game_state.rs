@@ -39,6 +39,13 @@ pub fn use_game_state() -> GameStateHandle {
                                 if new_state.easy_mode { 10 } else { 1 };
                         }
                     }
+                    GameAction::BuyUpgrade(upgrade) => {
+                        let cost = new_state.get_upgrade_cost(&upgrade);
+                        if new_state.counter >= cost {
+                            new_state.counter -= cost;
+                            new_state.apply_upgrade(upgrade.as_str());
+                        }
+                    }
                     GameAction::ToggleEasyMode => {
                         new_state.easy_mode = !new_state.easy_mode;
                     }
